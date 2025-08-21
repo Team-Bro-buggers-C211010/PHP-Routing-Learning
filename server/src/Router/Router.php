@@ -6,7 +6,7 @@ class Router
 {
     private array $routes = [];
 
-    public function add(string $path, string $method, callable $handler): void
+    private function add(string $path, string $method, callable $handler): void
     {
         $this->routes[$method][$path] = $handler;
     }
@@ -26,12 +26,45 @@ class Router
         try {
             if ($method === "GET") {
                 call_user_func($handler, $_GET);
-            } elseif ($method === "POST") {
-                call_user_func($handler, $_POST);
+            } else {
+                call_user_func($handler);
             }
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(["error" => "Internal server error", "details" => $e->getMessage()]);
         }
+    }
+
+    public function get(string $uri, callable $callbackFunction): void
+    {
+        $this->add(
+            $uri,
+            'GET',
+            $callbackFunction
+        );
+    }
+
+    public function post(string $uri, callable $callbackFunction): void {
+        $this->add(
+            $uri,
+            'POST',
+            $callbackFunction
+        );
+    }
+
+    public function put(string $uri, callable $callbackFunction): void {
+        $this->add(
+            $uri,
+            "PUT",
+            $callbackFunction
+        );
+    }
+
+    public function delete(string $uri, callable $callbackFunction): void {
+        $this->add(
+            $uri,
+            "DELETE",
+            $callbackFunction
+        );
     }
 }

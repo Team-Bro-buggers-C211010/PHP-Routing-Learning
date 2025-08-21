@@ -51,4 +51,32 @@ class UserController {
         $result = $this->gateway->create($data);
         echo json_encode($result);
     }
+
+    public function updateUser(): void {
+        $updatedData = json_decode(file_get_contents("php://input"), true);
+        $errors = Validator::validateUserData($updatedData);
+
+        if (!empty($errors)) {
+            http_response_code(422);
+            echo json_encode(["errors" => $errors]);
+            return;
+        }
+
+        $result = $this->gateway->update($updatedData);
+        echo json_encode($result);
+    }
+
+    public function deleteUser(): void {
+        $updatedData = json_decode(file_get_contents("php://input"), true);
+        $errors = Validator::validateUserId($updatedData);
+
+        if (!empty($errors)) {
+            http_response_code(422);
+            echo json_encode(["errors" => $errors]);
+            return;
+        }
+
+        $result = $this->gateway->delete($updatedData);
+        echo json_encode($result);
+    }
 }

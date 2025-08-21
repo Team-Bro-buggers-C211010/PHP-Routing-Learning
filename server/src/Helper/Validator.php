@@ -16,4 +16,12 @@ class Validator {
 
         return $errors;
     }
+
+    public static function validateUserId(array $data): array {
+        $errors = [];
+        if (empty($data["id"])) {
+            $errors[] = "Id is required";
+        }
+        return $errors;
+    }
 }
