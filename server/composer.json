@@ -1,0 +1,7 @@
+{
+    "name": "oniedutta/server",
+    "require": {
+        "vlucas/phpdotenv": "^5.6",
+        "firebase/php-jwt": "^6.11"
+    }
+}

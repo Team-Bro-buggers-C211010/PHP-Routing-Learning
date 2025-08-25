@@ -1,53 +1,52 @@
 <?php
 
+use Controllers\UserController;
+use Controllers\NotesController;
+use Services\UserService;
+use Services\NotesService;
+use Models\User;
+use Models\Note;
 
-// User routes here...
+// Initialize database connection
+$db = new Database();
 
-use Controller\NotesController;
-use Controller\UserController;
-use Model\NotesGateway;
-use Model\UserGateway;
+// Instantiate models
+$userModel = new User($db->getConnection());
+$noteModel = new Note($db->getConnection());
+
+// Instantiate services
+$userService = new UserService($userModel);
+$notesService = new NotesService($noteModel);
+
+// Instantiate controllers
+$userController = new UserController($userService);
+$notesController = new NotesController($notesService);
 
 
-$router->get('/users', function ($query): void {
-    $db = new Database();
-    $gateway = new UserGateway($db->getConnection());
-    $controller = new UserController($gateway);
+// User routes Here.......
 
+// here "use ($userController)" is set the $userController in the closure outer scope to use it in inner function.
+$router->get('/users', function ($query) use ($userController): void {
     if (isset($query['id'])) {
-        $controller->getUser($query);
+        $userController->getUser($query);
     } else {
-        $controller->getAllUsers();
+        $userController->getAllUsers($query);
     }
 });
 
-$router->post('/users', function (): void {
-    $db = new Database();
-    $gateway = new UserGateway($db->getConnection());
-    $controller = new UserController($gateway);
-    $controller->createUser();
+$router->post('/users', function () use ($userController): void {
+    $userController->createUser();
 });
 
-$router->put('/users', function (): void {
-    $db = new Database();
-    $gateway = new UserGateway($db->getConnection());
-    $controller = new UserController($gateway);
-    $controller->updateUser();
+$router->put('/users', function () use ($userController): void {
+    $userController->updateUser();
 });
 
-$router->delete('/users', function (): void {
-    $db = new Database();
-    $gateway = new UserGateway($db->getConnection());
-    $controller = new UserController($gateway);
-    $controller->deleteUser();
+$router->delete('/users', function () use ($userController): void {
+    $userController->deleteUser();
 });
 
-
-// notes routes here ....
-
-$router->get('/notes', function (): void {
-    $db = new Database();
-    $gateway = new NotesGateway($db->getConnection());
-    $controller = new NotesController($gateway);
-    $controller->getAllNotes();
+// Notes routes
+$router->get('/notes', function () use ($notesController): void {
+    $notesController->getAllNotes();
 });

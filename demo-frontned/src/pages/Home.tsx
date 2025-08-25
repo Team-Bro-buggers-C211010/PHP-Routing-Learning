@@ -4,11 +4,10 @@ import { userFormSchema } from "../Types/zod-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import UsersList from "../component/UsersList";
 import axios from "axios";
-import { useState } from "react";
+import type { FormInfo, Users } from "../Types/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Home = () => {
-
-    const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -23,21 +22,48 @@ const Home = () => {
     },
   });
 
+  const createUser = async (data: FormInfo) => {
+    const result = await axios.post(`http://localhost:8080/users`, data, { withCredentials: true });
+    return result.data;
+  };
+
+  const queryClient = useQueryClient();
+
+  const { mutate } = useMutation({
+    mutationFn: createUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      reset();
+      alert("Yessssss....: New user created!");
+    },
+    onMutate: async (newUser) => {
+      await queryClient.cancelQueries({ queryKey: ["users"] });
+      const previousUsers = queryClient.getQueryData(["users"]);
+      queryClient.setQueryData(["users"], (old: Users[] = []) => [
+        ...old,
+        { id: Date.now(), ...newUser },
+      ]);
+      return { previousUsers };
+    },
+
+    onError: (error, _variables, context) => {
+      alert("Error on creating: " + error.message);
+      if (context?.previousUsers) {
+        queryClient.setQueryData(["users"], context.previousUsers);
+      }
+    },
+  });
+
   const onSubmit = (data: z.infer<typeof userFormSchema>) => {
-    console.log(data);
     const callCreateUserApi = async () => {
-        try {
-            const result = await axios.post("http://localhost:8001/users", data);
-            const newUser = result.data;
-            reset();
-            alert("Yessssss....: New user created!");
-            return newUser;
-        } catch (error) {
-            if(error instanceof Error) {
-                alert("Error on creating: " + error.message);
-            }
+      try {
+        mutate(data);
+      } catch (error) {
+        if (error instanceof Error) {
+          alert("Error on creating: " + error.message);
         }
-    }
+      }
+    };
     callCreateUserApi();
   };
   return (
@@ -57,7 +83,9 @@ const Home = () => {
                 errors.name && "border-1 border-red-600"
               }`}
             />
-            {errors.name && <div className="text-red-500">{errors.name.message}</div>}
+            {errors.name && (
+              <div className="text-red-500">{errors.name.message}</div>
+            )}
           </div>
           <div>
             <input
@@ -68,9 +96,14 @@ const Home = () => {
                 errors.email && "border-1 border-red-600"
               }`}
             />
-            {errors.email && <div className="text-red-500">{errors.email.message}</div>}
+            {errors.email && (
+              <div className="text-red-500">{errors.email.message}</div>
+            )}
           </div>
-          <button className="cursor-pointer btn-outline border-amber-400 btn" type="submit">
+          <button
+            className="cursor-pointer btn-outline border-amber-400 btn"
+            type="submit"
+          >
             Submit now
           </button>
         </form>

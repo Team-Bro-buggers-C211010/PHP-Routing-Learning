@@ -1,10 +1,10 @@
 export interface FormInfo {
-    fullName: string;
+    name: string;
     email: string;
 }
 
 export interface Users {
     name: string;
     email: string;
-    id: string;
+    id?: string;
 }

@@ -1,4 +1,8 @@
+import useSearchStore from "../../store/store";
+
 const Navbar = () => {
+  const { query, setQuery } = useSearchStore();
+
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="flex-1">
@@ -8,6 +12,8 @@ const Navbar = () => {
         <input
           type="text"
           placeholder="Search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
           className="input input-bordered w-24 md:w-auto"
         />
         <div className="dropdown dropdown-end">
